@@ -4,6 +4,8 @@ import {
   View,
   Alert,
   Dimensions,
+  Text,
+  Keyboard,
 } from 'react-native';
 import * as settingsAction from "../redux/actions/settingsAction";
 import Geolocation, { GeoCoordinates } from 'react-native-geolocation-service';
@@ -15,6 +17,8 @@ import BottomSheet, { BottomSheetTextInput, BottomSheetView } from '@gorhom/bott
 import { Api_AddPosition, Api_QueryEvent, Api_QueryTrace } from '../lib/Api';
 import { connect } from 'react-redux';
 import { RootState } from '../redux/store';
+import { Notifications } from 'react-native-notifications';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 
 const zoomMap = {
@@ -49,12 +53,12 @@ class Home extends React.Component<any, any> {
       followUserLocation:false,
       open:false,
       scale:14,                   // 控制缩放
-      latitudeDelta:0.0375/64,    // 控制缩放
-      longitudeDelta:0.0812/64,   // 控制缩放
+      latitudeDelta:0.0375,    // 控制缩放
+      longitudeDelta:0.0812,   // 控制缩放
       observingPanelShow:false,   // bottomsheet 监控面板
+      eventName:"",
       record:{
         observing:false,
-        eventName:"",
         observingBtnTxt:"开始记录",
         observingBtnDisabled:false,
         observingBtnLoading:false,
@@ -76,21 +80,29 @@ class Home extends React.Component<any, any> {
     // 开始加载是，速度更重要，不需要精度太高
     Geolocation.getCurrentPosition(
       (position) => {
-        const {latitude,longitude} = Geo.wgs84togcj02(position.coords.longitude,position.coords.latitude)
-        this.setState({region:{
-          latitude,
-          longitude,
-          latitudeDelta: this.state.latitudeDelta,
-          longitudeDelta: this.state.longitudeDelta,
-
-        }})
-        this.setState({followUserLocation:false})
+        this.changeCenter({longitude:position.coords.longitude,latitude:position.coords.latitude},64);
       },
       (error) => {
         Alert.alert(error.code+error.message)
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 1000, accuracy:{ios:"nearestTenMeters"},distanceFilter:this.props.distanceFilter}
     );
+  }
+
+  /**
+   * 调整中心坐标
+   * @param position wgs84标准的坐标
+   */
+  changeCenter(position:LatLng,scale:number) {
+    const {latitude,longitude} = Geo.wgs84togcj02(position.longitude,position.latitude)
+        this.setState({region:{
+          latitude,
+          longitude,
+          latitudeDelta: this.state.latitudeDelta/scale,
+          longitudeDelta: this.state.longitudeDelta/scale,
+
+        }})
+        this.setState({followUserLocation:false})
   }
 
   /**
@@ -112,21 +124,25 @@ class Home extends React.Component<any, any> {
 
 
   drawTrace(item:any){
+
+    Keyboard.dismiss();
+    this.setState({eventName:item.event })
     Api_QueryTrace(item.owner,item.event).then((data)=>{
       const list:GeoCoordinates[] = (data.list as GeoCoordinates[])
       const polyline:LatLng[] = [];
-      list.map((item,idx)=>{
-        if(idx == 1 || idx == list.length - 1 || idx % 5 == 0){
-          polyline.push(Geo.wgs84togcj02(item.longitude,item.latitude));
-        }
+      list.map((item,_)=>{
+        polyline.push(Geo.wgs84togcj02(item.longitude,item.latitude));
       })
       console.log(`本次轨迹数:${polyline.length}`)
+      const center = list[parseInt(`${list.length/2}`)]
+      this.changeCenter({latitude:center.latitude,longitude:center.longitude},16);
       this.setState({polyline});
+      this.bottomSheet_record?.snapToIndex(0);
     });
   }
   handleWatching(){
 
-    if(!this.state.record.eventName){
+    if(!this.state.eventName){
       Alert.alert("开始记录前请先设置记录名称");
       return;
     }
@@ -141,13 +157,14 @@ class Home extends React.Component<any, any> {
         observingBtnLoading:false,
         obseringBtnColor:"#F8BC31",
       }
-      this.setState({record});
+      this.setState({record,followUserLocation:false});
+      
       console.log("已停止记录");
     }else{
       this.watchId = Geolocation.watchPosition((position)=>{
         
         console.log(`(${this.watchId})获取到位置：${position.coords.latitude}`);
-        Api_AddPosition(this.state.record.eventName,position.coords);
+        Api_AddPosition(this.state.eventName,position.coords);
       },(error)=>{
         Alert.alert(error.code+error.message);
       },{
@@ -164,7 +181,7 @@ class Home extends React.Component<any, any> {
         observingBtnLoading:false,
         obseringBtnColor:"#5AA4AE",
       }
-      this.setState({record});
+      this.setState({record,followUserLocation:true});
     }
   }
 
@@ -288,8 +305,17 @@ class Home extends React.Component<any, any> {
                 icon: 'google-assistant',
                 label:"智能助手", 
                 onPress: () => {
-                  this.props.setHideHomeFAB(true);
-                  this.props.navigation.navigate("Chat");
+                  //this.props.setHideHomeFAB(true);
+                  //this.props.navigation.navigate("Chat");
+                  let localNotification = Notifications.postLocalNotification({
+                    body: "Local notification!",
+                    title: "Local Notification Title",
+                    sound: "chime.aiff",
+                    silent: false,
+                    category: "SOME_CATEGORY",
+                    userInfo: { },
+                    fireDate: new Date(),
+                  });
                 } 
               },
               {
@@ -325,9 +351,9 @@ class Home extends React.Component<any, any> {
 
         {this.state.observingPanelShow && 
         <BottomSheet
-          ref={this.bottomSheet_record}
+          ref={(ref)=>{this.bottomSheet_record = ref}}
           index={1}
-          snapPoints={[200,320]}
+          snapPoints={[200,480]}
           enablePanDownToClose={true}
           keyboardBehavior="interactive"
           onClose={()=>{
@@ -336,13 +362,21 @@ class Home extends React.Component<any, any> {
         >
           <BottomSheetView style={styles.contentContainer}>
              
-            <BottomSheetTextInput value={this.state.record.eventName}
-                onChangeText={(val) => { this.setState({ record: {eventName:val} }); }}  
+            <BottomSheetTextInput value={this.state.eventName}
+                onChangeText={(val) => { this.setState({eventName:val}); }}  
                 placeholder='请输入`记录名称`'
                 editable={!this.state.record.observing}
                 clearButtonMode="always" style={styles.input} >
-                
             </BottomSheetTextInput>
+
+            <View style={{flexDirection:"row",height:50,marginTop:10}}>
+              
+              <Button style={{margin:5}} icon="record-rec" mode="contained" buttonColor={this.state.record.obseringBtnColor} 
+                loading={this.state.record.observing} onPress={()=>{this.handleWatching()}}>{this.state.record.observingBtnTxt}</Button>
+              
+              <Button style={{margin:5}} icon="monitor-lock" mode="contained" buttonColor={this.state.watch.obseringBtnColor} 
+                loading={this.state.watch.observing} onPress={()=>{this.onlyWatching()}}>{this.state.watch.observingBtnTxt}</Button>
+            </View>
 
             <View style={styles.eventHistory}>
               {
@@ -361,15 +395,7 @@ class Home extends React.Component<any, any> {
             </View>
             
 
-            <View style={{flexDirection:"row",height:50,marginTop:10}}>
-              
-              <Button style={{margin:5}} icon="record-rec" mode="contained" buttonColor={this.state.record.obseringBtnColor} 
-                loading={this.state.record.observing} onPress={()=>{this.handleWatching()}}>{this.state.record.observingBtnTxt}</Button>
-              
-              <Button style={{margin:5}} icon="monitor-lock" mode="contained" buttonColor={this.state.watch.obseringBtnColor} 
-                loading={this.state.watch.observing} onPress={()=>{this.onlyWatching()}}>{this.state.watch.observingBtnTxt}</Button>
-            
-            </View>
+           
           </BottomSheetView>
         </BottomSheet>}
       </View>
@@ -408,6 +434,34 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     width:"80%"
 
+  },
+  panel: {
+    padding: 10,
+    backgroundColor: '#fff',
+    shadowColor: '#fff',
+    shadowOffset: { width: 0, height: 0 },
+    shadowRadius: 5
+  },
+  panelButton: {
+    padding: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  panelButtonLast: {
+    padding: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginVertical: 10,
+    marginBottom: 30
+  },
+  panelCancelButtonTitle: {
+    fontSize: 15,
+    color: '#ffffff',
+  },
+  panelButtonTitle: {
+    fontSize: 15,
+    color: '#fff',
   },
   map: {
     ...StyleSheet.absoluteFillObject,
