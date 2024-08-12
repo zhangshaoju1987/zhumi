@@ -6,11 +6,12 @@ const baseURL = "https://service.joemeet.com"
 
 /**
  * 记录轨迹信息
+ * @param owner     归属用户
  * @param event     本次追踪的事件 
  * @param coordinates 当前的坐标
  * @returns 
  */
-export function Api_AddPosition(event:string,coordinates:GeoCoordinates){
+export function Api_AddPosition(owner:string,event:string,coordinates:GeoCoordinates){
 
     if(!event){
         return Promise.reject("缺失事件，忽略本次记录");
@@ -18,6 +19,7 @@ export function Api_AddPosition(event:string,coordinates:GeoCoordinates){
     const uri ="/life-travel-trace/add";
     const data = {
         event,
+        owner,
         ...coordinates
     }
     return postJson(baseURL+uri,data)
@@ -28,7 +30,7 @@ export function Api_AddPosition(event:string,coordinates:GeoCoordinates){
  * @param owner     事件归属方
  * @returns 
  */
-export function Api_QueryEvent(owner:number){
+export function Api_QueryEvent(owner:string){
 
     if(!owner){
         return Promise.reject("缺失主体");
@@ -46,7 +48,7 @@ export function Api_QueryEvent(owner:number){
  * @param event     事件名称
  * @returns 
  */
-export function Api_QueryTrace(owner:number,event:string){
+export function Api_QueryTrace(owner:string,event:string){
 
     if(!owner || !event){
         return Promise.reject("缺失主体或者事件名称");

@@ -16,7 +16,7 @@ import Slider from '@react-native-community/slider';
 import BottomSheet, { BottomSheetTextInput, BottomSheetView } from '@gorhom/bottom-sheet';
 import { Api_AddPosition, Api_QueryEvent, Api_QueryTrace } from '../lib/Api';
 import { connect } from 'react-redux';
-import { RootState } from '../redux/store';
+import { RootState, store } from '../redux/store';
 import { Notifications } from 'react-native-notifications';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
@@ -164,7 +164,7 @@ class Home extends React.Component<any, any> {
       this.watchId = Geolocation.watchPosition((position)=>{
         
         console.log(`(${this.watchId})获取到位置：${position.coords.latitude}`);
-        Api_AddPosition(this.state.eventName,position.coords);
+        Api_AddPosition(store.getState().settings.owner,this.state.eventName,position.coords);
       },(error)=>{
         Alert.alert(error.code+error.message);
       },{
@@ -276,14 +276,7 @@ class Home extends React.Component<any, any> {
               // 主动获取自身位置时，按最高精度获取
               Geolocation.getCurrentPosition(
                 (position) => {
-                  const {latitude,longitude} = Geo.wgs84togcj02(position.coords.longitude,position.coords.latitude)
-                  this.setState({region:{
-                    latitude,
-                    longitude,
-                    latitudeDelta: this.state.latitudeDelta,
-                    longitudeDelta: this.state.longitudeDelta,
-                  }})
-                  this.setState({followUserLocation:false})
+                  this.changeCenter({latitude:position.coords.latitude,longitude:position.coords.longitude},64);
                 },
                 (error) => {
                   Alert.alert(error.code+error.message)
@@ -323,7 +316,7 @@ class Home extends React.Component<any, any> {
                 label: '轨迹追踪',
                 onPress: async () => {
                   this.setState({observingPanelShow:true})
-                  Api_QueryEvent(1).then((data)=>{
+                  Api_QueryEvent(store.getState().settings.owner).then((data)=>{
                     this.setState({eventHistory:data.list});
                   });
                 },
