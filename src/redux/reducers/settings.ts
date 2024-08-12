@@ -1,0 +1,58 @@
+import { PayloadAction } from "@reduxjs/toolkit";
+
+const initialState =
+{
+	distanceFilter:0,
+    accuracy:"bestForNavigation",
+    username:"竹米",
+    owner:"1",
+    mapProvider:undefined,
+	hideHomeFAB : false,
+};
+
+const settings = (state = initialState, action:PayloadAction<typeof initialState>) =>
+{
+	switch (action.type)
+	{
+		case 'SET_DISTANCE_FILETER':
+		{
+			const {distanceFilter} = action.payload;
+			return {...state,distanceFilter};
+		}
+		case 'SET_ACCURACY':
+		{
+			const {accuracy} = action.payload;
+			return {...state,accuracy};
+		}
+
+		case 'SET_USERNAME':
+		{
+
+			const {username} = action.payload;
+			return {...state,username};
+		}
+
+		case 'SET_OWNER':
+		{
+
+			const {owner} = action.payload;
+			return {...state,owner};
+		}
+        case 'SET_MAPPROVIDER':
+		{
+
+			const {mapProvider} = action.payload;
+			return {...state,mapProvider};
+		}
+		case 'SET_HIDE_HOMEFAB':
+		{
+
+			const {hideHomeFAB} = action.payload;
+			return {...state,hideHomeFAB};
+		}
+		default:
+			return state;
+	}
+};
+
+export default settings;
