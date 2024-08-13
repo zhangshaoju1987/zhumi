@@ -12,7 +12,7 @@ import Home from './pages/Home';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
-import Overlays from "./examples/Overlays";
+import MapUsage from "./examples/MapUsage";
 import {Example} from "./pages/Chat";
 import UserProfile from './pages/UserProfile';
 import * as settingsAction from "./redux/actions/settingsAction";
@@ -90,7 +90,7 @@ export default class App extends React.Component {
                       },
                   })}>
                     <Stack.Screen name="Home" component={Home}  options={{headerShown: false,title:"首页"}}/>
-                    <Stack.Screen name="Overlays" component={Overlays}  options={{headerShown: true}}/>
+                    <Stack.Screen name="MapUsage" component={MapUsage}  options={{headerShown: true,title:"地图案例学习"}}/>
                     <Stack.Screen name="Chat" component={Example}  options={{headerShown: true,title:"智能助手"}}/>
                     <Stack.Screen name="UserProfile" component={UserProfile}  options={{headerShown: true,title:"配置中心"}}/>
                   </Stack.Navigator>

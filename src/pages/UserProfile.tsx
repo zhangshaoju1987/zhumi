@@ -10,14 +10,14 @@ function UserProfile(props:any){
     return (
       <View style={styles.container}>
 
-        <View style={{position:"relative",height:50}}>
-          <TextInput label="距离阈值" placeholder="单位：米。可以控制报送的频率" value={`${props.distanceFilter}`} onChangeText={text => props.setDistanceFilter(text)}/>
+        <View style={{position:"relative",height:60}}>
+          <TextInput label="距离阈值（位：米。可以控制报送的频率）" value={`${props.distanceFilter}`} onChangeText={text => props.setDistanceFilter(text)}/>
         </View>
-        <View style={{position:"relative",height:50}}>
-          <TextInput label="用户名" placeholder="自定义用户名" value={`${props.username}`} onChangeText={text => props.setUsername(text)}/>
+        <View style={{position:"relative",height:60}}>
+          <TextInput label="用户名称（自定义，可随意更改）" value={`${props.username}`} onChangeText={text => props.setUsername(text)}/>
         </View>
-        <View style={{position:"relative",height:50}}>
-          <TextInput label="唯一ID" placeholder="唯一ID;乱改会导致数据丢失" value={`${props.owner}`} onChangeText={text => props.setOwner(text)}/>
+        <View style={{position:"relative",height:60}}>
+          <TextInput label="用户凭证（一旦确定请勿随意乱改，会丢失之前的数据）" value={`${props.owner}`} onChangeText={text => props.setOwner(text)}/>
         </View>
         <List.Section title="精度设置">
           <View style={styles.chooseGroup}>

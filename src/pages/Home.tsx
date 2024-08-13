@@ -311,6 +311,14 @@ class Home extends React.Component<any, any> {
                   });
                 } 
               },
+              { 
+                icon: 'map-marker-radius',
+                label:"地图案例", 
+                onPress: () => {
+                  this.props.setHideHomeFAB(true);
+                  this.props.navigation.navigate("MapUsage");
+                } 
+              },
               {
                 icon: 'map-marker-distance',
                 label: '轨迹追踪',
