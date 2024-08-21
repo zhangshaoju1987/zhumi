@@ -8,8 +8,8 @@ import {
   Keyboard,
 } from 'react-native';
 import * as settingsAction from "../redux/actions/settingsAction";
-import Geolocation, { GeoCoordinates } from 'react-native-geolocation-service';
-import MapView, {Camera, LatLng, Polyline, UserLocationChangeEvent} from 'react-native-maps';
+import Geolocation, { AccuracyIOS, GeoCoordinates } from 'react-native-geolocation-service';
+import MapView, {Camera, LatLng, Polyline, Provider, Region, UserLocationChangeEvent} from 'react-native-maps';
 import { Avatar, Button, Chip, FAB, Portal } from 'react-native-paper';
 import Geo from '../lib/Geo';
 import Slider from '@react-native-community/slider';
@@ -19,9 +19,13 @@ import { connect } from 'react-redux';
 import { RootState, store } from '../redux/store';
 import { Notifications } from 'react-native-notifications';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import { NavigationAction } from '@react-navigation/native';
 
 
-const zoomMap = {
+interface ZoomDict{
+  [propName: string]: number;
+}
+const zoomMap:ZoomDict = {
   "16":11790/64,
   "15":11790/32,
   "14":11790/16,
@@ -40,7 +44,41 @@ const zoomMap = {
   "1":11790*512,
   "0":11790*1024,
 }
-class Home extends React.Component<any, any> {
+
+interface ObserveringBtnStatus{
+  observing:boolean,
+  observingBtnTxt:string,
+  observingBtnDisabled:boolean,
+  observingBtnLoading:boolean,
+  obseringBtnColor:string
+}
+
+interface HomeState{
+  followUserLocation:boolean,
+  open:boolean,
+  scale:number,                   // 控制缩放
+  latitudeDelta:number,    // 控制缩放
+  longitudeDelta:number,   // 控制缩放
+  observingPanelShow:boolean,   // bottomsheet 监控面板
+  eventName:string,
+  record:ObserveringBtnStatus,
+  watch:ObserveringBtnStatus,
+  eventHistory:LifeTraceEvent[],
+  polyline:LatLng[],
+  region?:Region|null
+}
+
+interface HomeProps{
+  accuracy:AccuracyIOS,
+  distanceFilter:number,
+  mapProvider:Provider,
+  hideHomeFAB:boolean,
+  owner:string,
+  setHideHomeFAB:(hideHomeFAB:boolean)=>{},
+  navigation:any
+}
+
+class Home extends React.Component<HomeProps, HomeState> {
   private bottomSheet_record:any;
   private map:any;
   private watchId:any;
@@ -135,7 +173,7 @@ class Home extends React.Component<any, any> {
       })
       console.log(`本次轨迹数:${polyline.length}`)
       const center = list[parseInt(`${list.length/2}`)]
-      this.changeCenter({latitude:center.latitude,longitude:center.longitude},16);
+      this.changeCenter({latitude:center.latitude,longitude:center.longitude},8);
       this.setState({polyline});
       this.bottomSheet_record?.snapToIndex(0);
     });
@@ -170,7 +208,7 @@ class Home extends React.Component<any, any> {
       },{
         enableHighAccuracy: true, 
         showsBackgroundLocationIndicator: true, 
-        accuracy:{ios:this.props.accuracy},
+        accuracy:{ios: this.props.accuracy},
         distanceFilter:this.props.distanceFilter
       });
       const record = {
@@ -251,6 +289,7 @@ class Home extends React.Component<any, any> {
             lineDashPattern={[5, 2, 3, 2]}
           /> 
           }
+
         </MapView>
         
       <View style={{width: 10, height: 170,position:"absolute",top:200,right:-40,transform: [{rotate: '270deg'}]}}>
@@ -298,17 +337,8 @@ class Home extends React.Component<any, any> {
                 icon: 'google-assistant',
                 label:"智能助手", 
                 onPress: () => {
-                  //this.props.setHideHomeFAB(true);
-                  //this.props.navigation.navigate("Chat");
-                  let localNotification = Notifications.postLocalNotification({
-                    body: "Local notification!",
-                    title: "Local Notification Title",
-                    sound: "chime.aiff",
-                    silent: false,
-                    category: "SOME_CATEGORY",
-                    userInfo: { },
-                    fireDate: new Date(),
-                  });
+                  this.props.setHideHomeFAB(true);
+                  this.props.navigation.navigate("Chat");  
                 } 
               },
               { 

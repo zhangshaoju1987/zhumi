@@ -149,8 +149,6 @@ export default class App extends React.Component<any, any> {
         [PolygonCreator, 'Polygon Creator', true],
         [PolylineCreator, 'Polyline Creator', true],
         [GradientPolylines, 'Gradient Polylines', true],
-        [AnimatedViews, 'Animating with MapViews'],
-        [AnimatedMarkers, 'Animated Marker Position'],
         [Callouts, 'Custom Callouts', true],
         [Overlays, 'Circles, Polygons, and Polylines', true],
         [DefaultMarkers, 'Default Markers', true],

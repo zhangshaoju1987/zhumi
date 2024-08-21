@@ -15,3 +15,8 @@ interface NotificationType{
     text:string
 
 }
+
+interface LifeTraceEvent{
+    event:string,
+    owner:string
+}
