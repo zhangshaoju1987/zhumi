@@ -6,6 +6,7 @@ import {
   Dimensions,
   Text,
   Keyboard,
+  Linking,
 } from 'react-native';
 import * as settingsAction from "../redux/actions/settingsAction";
 import Geolocation, { AccuracyIOS, GeoCoordinates } from 'react-native-geolocation-service';
@@ -19,7 +20,7 @@ import { connect } from 'react-redux';
 import { RootState, store } from '../redux/store';
 import { Notifications } from 'react-native-notifications';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { NavigationAction } from '@react-navigation/native';
+import { Link, NavigationAction } from '@react-navigation/native';
 
 
 interface ZoomDict{
@@ -116,12 +117,12 @@ class Home extends React.Component<HomeProps, HomeState> {
   componentDidMount(): void {
 
     // 开始加载是，速度更重要，不需要精度太高
-    Geolocation.getCurrentPosition(
+    Geolocation.getCurrentPosition( 
       (position) => {
         this.changeCenter({longitude:position.coords.longitude,latitude:position.coords.latitude},64);
       },
       (error) => {
-        Alert.alert(error.code+error.message)
+        Alert.alert("权限错误","位置权限受限(设置完请重新打开`竹米`)",[{text:"去设置",onPress:()=>{Linking.openURL("app-settings:");}}])
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 1000, accuracy:{ios:"nearestTenMeters"},distanceFilter:this.props.distanceFilter}
     );

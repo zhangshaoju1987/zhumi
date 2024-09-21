@@ -3,18 +3,15 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "android": "react-native run-android",
     "ios": "react-native run-ios",
-    "lint": "eslint .",
-    "start": "react-native start",
-    "test": "jest"
+    "start": "react-native start"
   },
   "dependencies": {
     "@gorhom/bottom-sheet": "^4.6.4",
     "@react-native-async-storage/async-storage": "^1.24.0",
     "@react-native-community/masked-view": "^0.1.11",
     "@react-native-community/slider": "^4.5.2",
-    "@react-native/metro-config": "^0.75.2",
+    "@react-native/metro-config": "^0.75.3",
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/stack": "^6.4.1",
     "@reduxjs/toolkit": "^2.2.7",
@@ -23,7 +20,7 @@
     "moment": "^2.30.1",
     "random-string": "^0.2.0",
     "react": "18.3.1",
-    "react-native": "0.75.2",
+    "react-native": "0.75.3",
     "react-native-background-actions": "^4.0.1",
     "react-native-geolocation-service": "^5.3.1",
     "react-native-gesture-handler": "^2.18.1",

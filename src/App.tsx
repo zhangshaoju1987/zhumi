@@ -15,11 +15,11 @@ import UserProfile from './pages/UserProfile';
 import * as settingsAction from "./redux/actions/settingsAction";
 import { PersistGate } from 'redux-persist/integration/react';
 
-
 const Stack = createStackNavigator();
 
 //registNotification();
 export default class App extends React.Component {
+
   render() {
     return (
       <Provider store={store}>
