@@ -341,14 +341,6 @@ class Home extends React.Component<HomeProps, HomeState> {
                   this.props.navigation.navigate("Chat");  
                 } 
               },
-              { 
-                icon: 'map-marker-radius',
-                label:"地图案例", 
-                onPress: () => {
-                  this.props.setHideHomeFAB(true);
-                  this.props.navigation.navigate("MapUsage");
-                } 
-              },
               {
                 icon: 'map-marker-distance',
                 label: '轨迹追踪',

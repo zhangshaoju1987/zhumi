@@ -1265,11 +1265,11 @@ PODS:
     - React-Core
   - react-native-geolocation-service (5.3.1):
     - React
-  - react-native-google-maps (1.17.2):
+  - react-native-google-maps (1.18.0):
     - Google-Maps-iOS-Utils (= 4.2.2)
     - GoogleMaps (= 7.4.0)
     - React-Core
-  - react-native-maps (1.17.2):
+  - react-native-maps (1.18.0):
     - React-Core
   - react-native-notifications (5.1.0):
     - React-Core
@@ -1975,8 +1975,8 @@ SPEC CHECKSUMS:
   React-microtasksnativemodule: 87b8de96f937faefece8afd2cb3a518321b2ef99
   react-native-background-actions: ea5bab231a28710eea614acb9ca595594415a5ec
   react-native-geolocation-service: 608e1da71a1ac31b4de64d9ef2815f697978c55b
-  react-native-google-maps: 819418493249ece3eafc9005ca0dd8141eebca56
-  react-native-maps: 4842065607475ef85ef57b601e309cbb470875af
+  react-native-google-maps: ee48410bb3f1390abfa20592a44db5d6ada83e4d
+  react-native-maps: 2e6e9896195781327ee15b33e3e84bf73c08207a
   react-native-notifications: 4601a5a8db4ced6ae7cfc43b44d35fe437ac50c4
   react-native-safe-area-context: b7daa1a8df36095a032dff095a1ea8963cb48371
   react-native-slider: 97ce0bd921f40de79cead9754546d5e4e7ba44f8
