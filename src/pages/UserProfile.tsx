@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Alert, StyleSheet, View } from "react-native";
+import { Alert, Linking, StyleSheet, View } from "react-native";
 import { Button, Chip, List, TextInput } from "react-native-paper";
 import * as settingsAction from "../redux/actions/settingsAction";
 import { connect } from "react-redux";
@@ -36,6 +36,12 @@ function UserProfile(props:any){
             <Chip showSelectedCheck onPress={()=>{props.setMapProvider("google")}} style={{margin:5}} key={"google"} selected={props.mapProvider == "google"}>谷歌地图</Chip>
           </View>
         </List.Section>
+
+        <View style={{position:"relative",height:60}}>
+        <Button icon="cogs" mode="contained" onPress={() => Linking.openURL("app-settings:")}>
+          权限设置
+        </Button>
+        </View>
       </View>
     )
 }
