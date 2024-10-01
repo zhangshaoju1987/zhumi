@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import * as settingsAction from "../redux/actions/settingsAction";
 import Geolocation, { AccuracyIOS, GeoCoordinates } from 'react-native-geolocation-service';
-import MapView, {Camera, LatLng, Polyline, Provider, Region, UserLocationChangeEvent} from 'react-native-maps';
+import MapView, {AnimatedRegion, Camera, LatLng, Polyline, Provider, Region, UserLocationChangeEvent} from 'react-native-maps';
 import { Avatar, Button, Chip, FAB, Portal } from 'react-native-paper';
 import Geo from '../lib/Geo';
 import Slider from '@react-native-community/slider';
@@ -66,7 +66,7 @@ interface HomeState{
   watch:ObserveringBtnStatus,
   eventHistory:LifeTraceEvent[],
   polyline:LatLng[],
-  region?:Region|null
+  region?:Region | AnimatedRegion
 }
 
 interface HomeProps{
@@ -134,13 +134,16 @@ class Home extends React.Component<HomeProps, HomeState> {
    */
   changeCenter(position:LatLng,scale:number) {
     const {latitude,longitude} = Geo.wgs84togcj02(position.longitude,position.latitude)
-        this.setState({region:{
+      const state = {
+        ...this.state,
+        region:{
           latitude,
           longitude,
           latitudeDelta: this.state.latitudeDelta/scale,
           longitudeDelta: this.state.longitudeDelta/scale,
-
-        }})
+        }
+      }
+        this.setState(state);
         this.setState({followUserLocation:false})
   }
 
@@ -288,7 +291,7 @@ class Home extends React.Component<HomeProps, HomeState> {
             strokeColor="rgba(0,0,200,0.5)"
             strokeWidth={1}
             lineDashPattern={[5, 2, 3, 2]}
-          /> 
+          />
           }
 
         </MapView>
