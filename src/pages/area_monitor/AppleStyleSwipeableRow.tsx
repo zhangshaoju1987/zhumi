@@ -1,5 +1,5 @@
 import React, { ReactNode, useRef } from 'react';
-import { StyleSheet, Text, View, I18nManager } from 'react-native';
+import { StyleSheet, Text, View, I18nManager, Alert } from 'react-native';
 
 import { RectButton } from 'react-native-gesture-handler';
 import Animated, {
@@ -11,6 +11,7 @@ import Animated, {
 import Swipeable, {
   SwipeableMethods,
 } from 'react-native-gesture-handler/ReanimatedSwipeable';
+import Clipboard from '@react-native-clipboard/clipboard';
 
 interface AppleStyleSwipeableRowProps {
   children?: ReactNode;
@@ -78,7 +79,10 @@ const RightAction = ({
   const pressHandler = () => {
     swipeableRef.current?.close();
     // eslint-disable-next-line no-alert
-    window.alert(text);
+   
+    Clipboard.getString().then((str)=>{
+      Alert.alert(`${text}->${str}`);
+    })
   };
 
   return (
