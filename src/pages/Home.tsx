@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import * as settingsAction from "../redux/actions/settingsAction";
 import Geolocation, { AccuracyIOS, GeoCoordinates } from 'react-native-geolocation-service';
-import MapView, {AnimatedRegion, Callout, Camera, LatLng, Marker, Polyline, Provider, Region, UserLocationChangeEvent} from 'react-native-maps';
+import MapView, {AnimatedRegion, Callout, Camera, LatLng, LongPressEvent, Marker, Polyline, Provider, Region, UserLocationChangeEvent} from 'react-native-maps';
 import { Avatar, Button, Chip, FAB, Icon, Portal, Searchbar } from 'react-native-paper';
 import Geo from '../lib/Geo';
 import Slider from '@react-native-community/slider';
@@ -21,6 +21,8 @@ import { RootState, store } from '../redux/store';
 import NorthPng from "../../assets/north.png"
 import PointHere from "../../assets/point-of-interest.png"
 import moment from 'moment';
+import Clipboard from '@react-native-clipboard/clipboard';
+import { notify } from '../redux/actions/requestAction';
 
 interface ZoomDict{
   [propName: string]: number;
@@ -68,6 +70,7 @@ interface HomeState{
   directions:number[][],
   traceList:any[],
   traceDistance:number,
+  traceTime:number,
   region?:Region | AnimatedRegion,
   keyword:string
 }
@@ -119,6 +122,7 @@ class Home extends React.Component<HomeProps, HomeState> {
       directions:[],
       traceList:[],
       traceDistance:0,
+      traceTime:0,
       keyword:"",
     };
   }
@@ -196,9 +200,11 @@ class Home extends React.Component<HomeProps, HomeState> {
       const center = list[parseInt(`${list.length/2}`)]
       this.changeCenter({latitude:center.latitude,longitude:center.longitude},8);
 
-
+      // 轨迹总长度：千米
       const traceDistance = directions.map((item)=>item[1]).reduce((pre,cur)=>pre+cur)/1000;
-      this.setState({polyline,directions,traceList,traceDistance});
+      // 轨迹总时间
+      const traceTime = moment(list[list.length-1].time,"YYYY-MM-DD HH:mm:ss").diff(moment(list[0].time,"YYYY-MM-DD HH:mm:ss"),"minutes")
+      this.setState({polyline,directions,traceList,traceDistance,traceTime});
       this.bottomSheet_record?.snapToIndex(0);
     });
   }
@@ -247,6 +253,11 @@ class Home extends React.Component<HomeProps, HomeState> {
     }
   }
 
+  onLongPress(event:LongPressEvent){
+    const text = `${event.nativeEvent.coordinate.longitude},${event.nativeEvent.coordinate.latitude}`;
+    Clipboard.setString(text);
+    store.dispatch(notify({text:"经纬度已复制"}))
+  }
 
 
   onlyWatching(){
@@ -302,7 +313,10 @@ class Home extends React.Component<HomeProps, HomeState> {
           showsCompass={true}
           style={styles.map}
           region={this.state.region}
+          showsTraffic={true}
+          userLocationCalloutEnabled={true}
           onUserLocationChange={event => this.onUserLocationChange(event)}
+          onLongPress={(event)=>{this.onLongPress(event)}}
         >
           {
           this.state.polyline.length > 0 &&
@@ -347,7 +361,7 @@ class Home extends React.Component<HomeProps, HomeState> {
                   <Text>坐标经度：{val.longitude}</Text>
                   <Text>坐标纬度：{val.latitude}</Text>
                   {idx < this.state.polyline.length-1 && <Text>区间距离：{this.state.directions[idx][1]}米/{this.state.traceDistance.toFixed(2)}千米</Text>}
-                  {idx < this.state.polyline.length-1 && <Text>区间耗时：{elipsed}秒</Text>}
+                  {idx < this.state.polyline.length-1 && <Text>区间耗时：{elipsed}秒/{this.state.traceTime}分钟</Text>}
                   {idx < this.state.polyline.length-1 && <Text>区间速度：{(this.state.directions[idx][1]/elipsed).toFixed(2)}米/秒</Text>}
                   <Text>轨迹时间：{this.state.traceList[idx].time}</Text>
                 </Callout>
