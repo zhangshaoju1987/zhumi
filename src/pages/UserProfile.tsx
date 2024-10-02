@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Alert, Linking, StyleSheet, View } from "react-native";
-import { Button, Chip, List, TextInput } from "react-native-paper";
+import { Button, Chip, List, Switch, Text, TextInput } from "react-native-paper";
 import * as settingsAction from "../redux/actions/settingsAction";
 import { connect } from "react-redux";
 import { RootState } from "../redux/store";
@@ -18,6 +18,10 @@ function UserProfile(props:any){
         </View>
         <View style={{position:"relative",height:60}}>
           <TextInput label="用户凭证（一旦确定请勿随意乱改，会丢失之前的数据）" value={`${props.owner}`} onChangeText={text => props.setOwner(text)}/>
+        </View>
+        <View style={{position:"relative",height:60,paddingLeft:15}}>
+          <Text variant="labelMedium" style={{color:"gray"}}>跟随用户{props.followUserLocation}</Text>
+          <Switch style={{width:100}} value={props.followUserLocation} onValueChange={(val)=>{props.setFollowUserLocation(val)}} />
         </View>
         <List.Section title="精度设置">
           <View style={styles.chooseGroup}>
@@ -38,9 +42,7 @@ function UserProfile(props:any){
         </List.Section>
 
         <View style={{position:"relative",height:60}}>
-        <Button icon="cogs" mode="contained" onPress={() => Linking.openURL("app-settings:")}>
-          权限设置
-        </Button>
+          <Button icon="cogs" mode="contained" onPress={() => Linking.openURL("app-settings:")}>权限设置</Button>
         </View>
       </View>
     )
@@ -53,7 +55,8 @@ const mapStateToProps = (state:RootState) =>{
     distanceFilter : state.settings.distanceFilter,
     username : state.settings.username,
     owner : state.settings.owner,
-    mapProvider : state.settings.mapProvider
+    mapProvider : state.settings.mapProvider,
+    followUserLocation:state.settings.followUserLocation
 	}
 }
 
@@ -63,7 +66,8 @@ const mapDispatchToProps = (dispatch:any) =>
     setDistanceFilter : (distanceFilter:string) => dispatch(settingsAction.setDistanceFilter(distanceFilter)),
     setUsername : (username:string) => dispatch(settingsAction.setUsername(username)),
     setMapProvider : (mapProvider:string) => dispatch(settingsAction.setMapProvider(mapProvider)),
-    setOwner : (owner:string) => dispatch(settingsAction.setOwner(owner))
+    setOwner : (owner:string) => dispatch(settingsAction.setOwner(owner)),
+    setFollowUserLocation : (followsUserLocation:boolean) => dispatch(settingsAction.setFollowUserLocation(followsUserLocation))
 	});
 
 export default connect(

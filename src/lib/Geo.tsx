@@ -1,3 +1,5 @@
+import { LatLng } from "react-native-maps"
+
 const x_PI = 3.14159265358979324 * 3000.0 / 180.0
 const PI = 3.1415926535897932384626
 const a = 6378245.0
@@ -69,6 +71,28 @@ function wgs84togcj02(lng:number, lat:number){
     }
   }
 
+  /**
+   * 计算两个经纬度坐标之间的距离和坐标
+   * @param start 
+   * @param end 
+   * @returns 
+   */
+  function calc_azimuth(start:LatLng, end:LatLng){
+    const lat1_rad = start.latitude * Math.PI / 180
+    const lon1_rad = start.longitude * Math.PI/ 180
+    const lat2_rad = end.latitude * Math.PI / 180
+    const lon2_rad = end.longitude * Math.PI / 180
+
+    const y = Math.sin(lon2_rad - lon1_rad) * Math.cos(lat2_rad)
+    const x = Math.cos(lat1_rad) * Math.sin(lat2_rad) - Math.sin(lat1_rad) * Math.cos(lat2_rad) * Math.cos(lon2_rad - lon1_rad)
+
+    const brng = Math.atan2(y, x) * 180 / Math.PI
+    const deg = (brng + 360.0) % 360.0;
+    const R = 6378137
+    const d = Math.acos(Math.sin(lat1_rad)*Math.sin(lat2_rad)+ Math.cos(lat1_rad)*Math.cos(lat2_rad)*Math.cos(lon2_rad-lon1_rad))*R
+    return [deg,parseFloat(d.toFixed(2))];
+  }
   export default {
-    wgs84togcj02
+    wgs84togcj02,
+    calc_azimuth
   }

@@ -8,6 +8,7 @@ const initialState =
     owner:"1",
     mapProvider:undefined,
 	hideHomeFAB : false,
+	followUserLocation:true
 };
 
 const settings = (state = initialState, action:PayloadAction<typeof initialState>) =>
@@ -18,6 +19,11 @@ const settings = (state = initialState, action:PayloadAction<typeof initialState
 		{
 			const {distanceFilter} = action.payload;
 			return {...state,distanceFilter};
+		}
+		case 'SET_FOLLOW_USER_LOCATION':
+		{
+			const {followUserLocation} = action.payload;
+			return {...state,followUserLocation};
 		}
 		case 'SET_ACCURACY':
 		{

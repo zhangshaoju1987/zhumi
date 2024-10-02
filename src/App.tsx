@@ -11,6 +11,8 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 import {Example} from "./pages/Chat";
+import AreaTask from "./pages/area_monitor/index";
+import App1 from "./App1";
 import UserProfile from './pages/UserProfile';
 import * as settingsAction from "./redux/actions/settingsAction";
 import { PersistGate } from 'redux-persist/integration/react';
@@ -43,6 +45,8 @@ export default class App extends React.Component {
                   })}>
                     <Stack.Screen name="Home" component={Home}  options={{headerShown: false,title:"首页"}}/>
                     <Stack.Screen name="Chat" component={Example}  options={{headerShown: true,title:"智能助手"}}/>
+                    <Stack.Screen name="AreaTask" component={AreaTask}  options={{headerShown: true,title:"电子围栏"}}/>
+                    <Stack.Screen name="Map" component={App1}  options={{headerShown: true,title:"地图案例"}}/>
                     <Stack.Screen name="UserProfile" component={UserProfile}  options={{headerShown: true,title:"配置中心"}}/>
                   </Stack.Navigator>
                 </NavigationContainer>

@@ -3,25 +3,24 @@ import {
   StyleSheet,
   View,
   Alert,
-  Dimensions,
   Text,
   Keyboard,
   Linking,
+  Image,
 } from 'react-native';
 import * as settingsAction from "../redux/actions/settingsAction";
 import Geolocation, { AccuracyIOS, GeoCoordinates } from 'react-native-geolocation-service';
-import MapView, {AnimatedRegion, Camera, LatLng, Polyline, Provider, Region, UserLocationChangeEvent} from 'react-native-maps';
-import { Avatar, Button, Chip, FAB, Portal } from 'react-native-paper';
+import MapView, {AnimatedRegion, Callout, Camera, LatLng, Marker, Polyline, Provider, Region, UserLocationChangeEvent} from 'react-native-maps';
+import { Avatar, Button, Chip, FAB, Icon, Portal, Searchbar } from 'react-native-paper';
 import Geo from '../lib/Geo';
 import Slider from '@react-native-community/slider';
 import BottomSheet, { BottomSheetTextInput, BottomSheetView } from '@gorhom/bottom-sheet';
 import { Api_AddPosition, Api_QueryEvent, Api_QueryTrace } from '../lib/Api';
 import { connect } from 'react-redux';
 import { RootState, store } from '../redux/store';
-import { Notifications } from 'react-native-notifications';
-import { TouchableOpacity } from 'react-native-gesture-handler';
-import { Link, NavigationAction } from '@react-navigation/native';
-
+import NorthPng from "../../assets/north.png"
+import PointHere from "../../assets/point-of-interest.png"
+import moment from 'moment';
 
 interface ZoomDict{
   [propName: string]: number;
@@ -66,7 +65,11 @@ interface HomeState{
   watch:ObserveringBtnStatus,
   eventHistory:LifeTraceEvent[],
   polyline:LatLng[],
-  region?:Region | AnimatedRegion
+  directions:number[][],
+  traceList:any[],
+  traceDistance:number,
+  region?:Region | AnimatedRegion,
+  keyword:string
 }
 
 interface HomeProps{
@@ -75,6 +78,7 @@ interface HomeProps{
   mapProvider:Provider,
   hideHomeFAB:boolean,
   owner:string,
+  followUserLocation:boolean,
   setHideHomeFAB:(hideHomeFAB:boolean)=>{},
   navigation:any
 }
@@ -89,7 +93,7 @@ class Home extends React.Component<HomeProps, HomeState> {
     this.map = React.createRef<MapView>();
     this.watchId = React.createRef<number>();
     this.state = {
-      followUserLocation:false,
+      followUserLocation:store.getState().settings.followUserLocation,
       open:false,
       scale:14,                   // 控制缩放
       latitudeDelta:0.0375,    // 控制缩放
@@ -111,7 +115,11 @@ class Home extends React.Component<HomeProps, HomeState> {
         obseringBtnColor:"#5AA4AE"
       },
       eventHistory:[],
-      polyline:[]
+      polyline:[],
+      directions:[],
+      traceList:[],
+      traceDistance:0,
+      keyword:"",
     };
   }
   componentDidMount(): void {
@@ -144,7 +152,6 @@ class Home extends React.Component<HomeProps, HomeState> {
         }
       }
         this.setState(state);
-        this.setState({followUserLocation:false})
   }
 
   /**
@@ -154,7 +161,6 @@ class Home extends React.Component<HomeProps, HomeState> {
     this.map?.current.getCamera().then((cam: Camera) => {
       (cam as any).altitude = zoomMap[`${this.state.scale}`];
       this.map?.current.animateCamera(cam);
-      this.setState({followUserLocation:false});
     });
   };
 
@@ -164,7 +170,6 @@ class Home extends React.Component<HomeProps, HomeState> {
     //console.log("用户位置："+JSON.stringify(coordinate))
   }
 
-
   drawTrace(item:any){
 
     Keyboard.dismiss();
@@ -172,13 +177,28 @@ class Home extends React.Component<HomeProps, HomeState> {
     Api_QueryTrace(item.owner,item.event).then((data)=>{
       const list:GeoCoordinates[] = (data.list as GeoCoordinates[])
       const polyline:LatLng[] = [];
-      list.map((item,_)=>{
-        polyline.push(Geo.wgs84togcj02(item.longitude,item.latitude));
+      const directions:number[][] = [];
+      const traceList:any[] = [];
+
+      list.map((item,idx)=>{
+        const _1 = Geo.wgs84togcj02(item.longitude,item.latitude);
+        polyline.push(_1);
+        traceList.push(item);
+
+        if(idx < list.length -1){
+          const _2 = Geo.wgs84togcj02(list[idx+1].longitude,list[idx+1].latitude);
+          directions.push(Geo.calc_azimuth(_1,_2));
+        }else{
+          directions.push([0,0]);
+        }
       })
       console.log(`本次轨迹数:${polyline.length}`)
       const center = list[parseInt(`${list.length/2}`)]
       this.changeCenter({latitude:center.latitude,longitude:center.longitude},8);
-      this.setState({polyline});
+
+
+      const traceDistance = directions.map((item)=>item[1]).reduce((pre,cur)=>pre+cur)/1000;
+      this.setState({polyline,directions,traceList,traceDistance});
       this.bottomSheet_record?.snapToIndex(0);
     });
   }
@@ -199,7 +219,7 @@ class Home extends React.Component<HomeProps, HomeState> {
         observingBtnLoading:false,
         obseringBtnColor:"#F8BC31",
       }
-      this.setState({record,followUserLocation:false});
+      this.setState({record});
       
       console.log("已停止记录");
     }else{
@@ -223,7 +243,7 @@ class Home extends React.Component<HomeProps, HomeState> {
         observingBtnLoading:false,
         obseringBtnColor:"#5AA4AE",
       }
-      this.setState({record,followUserLocation:true});
+      this.setState({record});
     }
   }
 
@@ -276,7 +296,7 @@ class Home extends React.Component<HomeProps, HomeState> {
           ref={this.map}
           provider={this.props.mapProvider}
           showsUserLocation={true}
-          followsUserLocation={this.state.followUserLocation}
+          followsUserLocation={this.props.followUserLocation}
           showsMyLocationButton={true}
           showsScale={true}
           showsCompass={true}
@@ -288,15 +308,56 @@ class Home extends React.Component<HomeProps, HomeState> {
           this.state.polyline.length > 0 &&
           <Polyline
             coordinates={this.state.polyline}
-            strokeColor="rgba(0,0,200,0.5)"
+            strokeColor="red"
+            
             strokeWidth={1}
+            fillColor='green'
+            tappable={true}
             lineDashPattern={[5, 2, 3, 2]}
-          />
+          >
+            
+          </Polyline>
           }
 
+          {
+          this.state.polyline.map((val,idx)=>{
+            const rotate = this.state.directions[idx][0]+"deg";
+            const source = idx != this.state.polyline.length-1?NorthPng:PointHere;
+            let elipsed = 0;
+            if(idx < this.state.polyline.length-1){
+              const currentTime = this.state.traceList[idx].time;
+              const nextTime = this.state.traceList[idx+1].time;
+              const start_date = moment(currentTime,"YYYY-MM-DD HH:mm:ss");
+              const end_date = moment(nextTime,"YYYY-MM-DD HH:mm:ss");
+              elipsed = end_date.diff(start_date,"seconds");
+            }
+            const nextIdx = idx == this.state.polyline.length-1?idx:idx+1
+            return (
+              <Marker
+                key={idx}
+                coordinate={val}
+                title={`位置：${idx}`}
+                opacity={1}
+              >
+                {/**注意：这里Image一定要放在Callout前面 */}
+                <Image source={source} style={{width:16,height:16,transform:[{rotate}]}}  resizeMode='contain'/> 
+                <Callout style={{width:240,padding:5}}>
+                  <Text>全局编码：{this.state.traceList[idx].uuid.substring(24)}</Text>
+                  <Text>轨迹编号：{idx+1}{` -> `}{nextIdx+1}</Text>
+                  <Text>坐标经度：{val.longitude}</Text>
+                  <Text>坐标纬度：{val.latitude}</Text>
+                  {idx < this.state.polyline.length-1 && <Text>区间距离：{this.state.directions[idx][1]}米/{this.state.traceDistance.toFixed(2)}千米</Text>}
+                  {idx < this.state.polyline.length-1 && <Text>区间耗时：{elipsed}秒</Text>}
+                  {idx < this.state.polyline.length-1 && <Text>区间速度：{(this.state.directions[idx][1]/elipsed).toFixed(2)}米/秒</Text>}
+                  <Text>轨迹时间：{this.state.traceList[idx].time}</Text>
+                </Callout>
+              </Marker>
+            )
+          })
+        }
         </MapView>
         
-      <View style={{width: 10, height: 170,position:"absolute",top:200,right:-40,transform: [{rotate: '270deg'}]}}>
+      {/* <View style={{width: 10, height: 170,position:"absolute",top:200,right:-40,transform: [{rotate: '270deg'}]}}>
           <Slider
             style={{width: 170, height: 10}}
             minimumValue={0}
@@ -310,7 +371,13 @@ class Home extends React.Component<HomeProps, HomeState> {
               this.handleZoom();
             }}
           />
-        </View>
+        </View> */}
+
+    <View style={{width: 360, height: 100,position:"absolute",top:60}}>
+      <Searchbar placeholder="我的活动" onChangeText={(keyword)=>{this.setState({keyword})}} value={this.state.keyword}/>
+    </View>
+
+
         {!this.state.observingPanelShow && !this.props.hideHomeFAB && <Portal>
           <FAB  icon="google-maps"
             size={"small"}
@@ -345,6 +412,23 @@ class Home extends React.Component<HomeProps, HomeState> {
                   this.props.navigation.navigate("Chat");  
                 } 
               },
+              { 
+                icon: 'alarm-note',
+                label:"电子围栏", 
+                onPress: () => {
+                  this.props.setHideHomeFAB(true);
+                  this.props.navigation.navigate("AreaTask");  
+                } 
+              },
+              { 
+                icon: 'google-assistant',
+                label:"地图案例", 
+                onPress: () => {
+                  this.props.setHideHomeFAB(true);
+                  this.props.navigation.navigate("Map");  
+                } 
+              },
+              
               {
                 icon: 'map-marker-distance',
                 label: '轨迹追踪',
@@ -357,7 +441,7 @@ class Home extends React.Component<HomeProps, HomeState> {
               },
               {
                 icon: 'cog',
-                label: '设置',
+                label: '系统设置',
                 onPress: () => {
                   this.props.setHideHomeFAB(true);
                   this.props.navigation.navigate("UserProfile")
@@ -502,7 +586,8 @@ export default connect(
     username :        state.settings.username,
     owner :           state.settings.owner,
     mapProvider :     state.settings.mapProvider,
-    hideHomeFAB:      state.settings.hideHomeFAB
+    hideHomeFAB:      state.settings.hideHomeFAB,
+    followUserLocation:state.settings.followUserLocation
 	}),
   (dispatch:any)=>({
     setHideHomeFAB : (hideHomeFAB:boolean) => dispatch(settingsAction.setHideHomeFAB(hideHomeFAB)),

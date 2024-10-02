@@ -17,8 +17,8 @@ const store = configureStore({
       getDefaultMiddleware({
           serializableCheck: {
         		ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
-        }}),
-				//.concat(logger),
+        }})
+				.concat(logger),
     devTools: true,
 })
 const persistor = persistStore(store);

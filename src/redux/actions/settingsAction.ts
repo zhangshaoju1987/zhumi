@@ -32,3 +32,8 @@ export const setHideHomeFAB = (hideHomeFAB:boolean) =>
         type: 'SET_HIDE_HOMEFAB',
         payload: { hideHomeFAB }
     });
+export const setFollowUserLocation = (followUserLocation:boolean) =>
+    ({
+        type: 'SET_FOLLOW_USER_LOCATION',
+        payload: { followUserLocation }
+    });
