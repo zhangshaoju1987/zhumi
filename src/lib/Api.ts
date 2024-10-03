@@ -1,9 +1,10 @@
 import { GeoCoordinates } from "react-native-geolocation-service";
 import { postJson } from "./Http";
+import { Dimensions } from "react-native";
 
 
 const baseURL = "https://service.joemeet.com"
-
+export const WIN_HEIGHT = Dimensions.get("window").height;
 /**
  * 记录轨迹信息
  * @param owner     归属用户

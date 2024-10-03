@@ -5,7 +5,9 @@ export interface TaskInfo{
     uuid:string,
     type:string,
     center:LatLng,
-    radius:number
+    radius:number,
+	enterNotify:boolean,
+	leaveNotify:boolean
 }
 
 const tasks = (state = [], action:PayloadAction<TaskInfo>) =>
