@@ -54,7 +54,7 @@ const renderLeftActions = (
   _: any,
   progress: SharedValue<number>,
   swipeableRef: React.RefObject<SwipeableMethods>,
-  item:DataRow,
+  
   navigation:any
 ) => <LeftAction dragX={progress} swipeableRef={swipeableRef} />;
 
@@ -65,7 +65,7 @@ interface RightActionProps {
   progress: SharedValue<number>;
   totalWidth: number;
   swipeableRef: React.RefObject<SwipeableMethods>;
-  uuid:string;
+  item:DataRow,
   navigation:any
 }
 
@@ -76,7 +76,7 @@ const RightAction = ({
   progress,
   totalWidth,
   swipeableRef,
-  uuid,
+  item,
   navigation
 }: RightActionProps) => {
   const animatedStyle = useAnimatedStyle(() => ({
@@ -91,7 +91,7 @@ const RightAction = ({
     // eslint-disable-next-line no-alert
    
     if(text === "任务设置"){
-      navigation.navigate("TaskAddView",{uuid});
+      navigation.navigate("TaskAddView",{uuid: item.uuid,title:item.from});
     }
 
   };
@@ -123,7 +123,7 @@ const renderRightActions = (
       progress={progress}
       totalWidth={192}
       swipeableRef={swipeableRef}
-      uuid = {item.uuid}
+      item = {item}
       navigation = {navigation}
     />
     <RightAction
@@ -133,7 +133,7 @@ const renderRightActions = (
       progress={progress}
       totalWidth={192}
       swipeableRef={swipeableRef}
-      uuid = {item.uuid}
+      item = {item}
       navigation = {navigation}
     />
   </View>

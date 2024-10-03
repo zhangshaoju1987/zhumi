@@ -7,6 +7,7 @@ import {
   Keyboard,
   Linking,
   Image,
+  Vibration,
 } from 'react-native';
 import * as settingsAction from "../redux/actions/settingsAction";
 import Geolocation, { AccuracyIOS, GeoCoordinates } from 'react-native-geolocation-service';
@@ -401,6 +402,11 @@ class Home extends React.Component<HomeProps, HomeState> {
               Geolocation.getCurrentPosition(
                 (position) => {
                   this.changeCenter({latitude:position.coords.latitude,longitude:position.coords.longitude},64);
+                  Vibration.vibrate([
+                    1 * 1000,
+                    2 * 1000,
+                    3 * 1000,
+                  ],true);
                 },
                 (error) => {
                   Alert.alert(error.code+error.message)

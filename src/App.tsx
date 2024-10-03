@@ -48,7 +48,7 @@ export default class App extends React.Component {
                     <Stack.Screen name="Home" component={Home}  options={{headerShown: false,title:"首页"}}/>
                     <Stack.Screen name="Chat" component={Example}  options={{headerShown: true,title:"智能助手"}}/>
                     <Stack.Screen name="AreaTask" component={AreaTask}  options={{headerShown: true,title:"电子围栏"}}/>
-                    <Stack.Screen name="TaskAddView" component={TaskAddView}  options={{headerShown: true,title:"设置任务"}}/>
+                    <Stack.Screen name="TaskAddView" component={TaskAddView} options={({ route }) => ({ headerShown: true,title: (route.params as any)?.title||"任务设置" })}/>
                     <Stack.Screen name="Map" component={App1}  options={{headerShown: true,title:"地图案例"}}/>
                     <Stack.Screen name="UserProfile" component={UserProfile}  options={{headerShown: true,title:"配置中心"}}/>
                   </Stack.Navigator>
