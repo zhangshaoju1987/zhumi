@@ -9,7 +9,8 @@ import GmailStyleSwipeableRow from './GmailStyleSwipeableRow';
 //  To toggle LTR/RTL change to `true`
 I18nManager.allowRTL(false);
 
-type DataRow = {
+export type DataRow = {
+  uuid:string;
   from: string;
   when: string;
   message: string;
@@ -26,9 +27,9 @@ const Row = ({ item }: { item: DataRow }) => (
   </RectButton>
 );
 
-const SwipeableRow = ({ item, index }: { item: DataRow; index: number }) => {
+const SwipeableRow = ({ item, index,navigation }: { item: DataRow; index: number,navigation: any }) => {
   return (
-    <AppleStyleSwipeableRow>
+    <AppleStyleSwipeableRow item={item} navigation={navigation}>
       <Row item={item} />
     </AppleStyleSwipeableRow>
   );
@@ -36,13 +37,13 @@ const SwipeableRow = ({ item, index }: { item: DataRow; index: number }) => {
 
 const Separator = () => <View style={styles.separator} />;
 
-export default function App() {
+export default function App(props:any) {
   return (
     <FlatList
       data={DATA}
       ItemSeparatorComponent={Separator}
       renderItem={({ item, index }) => (
-        <SwipeableRow item={item} index={index} />
+        <SwipeableRow item={item} index={index} navigation={props.navigation}/>
       )}
       keyExtractor={(_item, index) => `message ${index}`}
     />
@@ -83,8 +84,15 @@ const styles = StyleSheet.create({
 
 const DATA: DataRow[] = [
   {
+    uuid:"123",
     from: "民生大厦上班提醒",
     when: '2024-10-21 21:08:09',
     message:'早上提醒上班打开，晚上提醒下班签退',
+  },
+  {
+    uuid:"124",
+    from: "潮汕牛肉店",
+    when: '2024-10-11 21:08:09',
+    message:'探店吃牛肉',
   }
 ];

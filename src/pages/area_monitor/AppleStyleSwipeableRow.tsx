@@ -12,9 +12,13 @@ import Swipeable, {
   SwipeableMethods,
 } from 'react-native-gesture-handler/ReanimatedSwipeable';
 import Clipboard from '@react-native-clipboard/clipboard';
+import { DataRow } from '.';
+import { useNavigation } from '@react-navigation/native';
 
 interface AppleStyleSwipeableRowProps {
+  item:DataRow
   children?: ReactNode;
+  navigation:any;
 }
 
 interface LeftActionsProps {
@@ -49,7 +53,9 @@ const LeftAction = ({ dragX, swipeableRef }: LeftActionsProps) => {
 const renderLeftActions = (
   _: any,
   progress: SharedValue<number>,
-  swipeableRef: React.RefObject<SwipeableMethods>
+  swipeableRef: React.RefObject<SwipeableMethods>,
+  item:DataRow,
+  navigation:any
 ) => <LeftAction dragX={progress} swipeableRef={swipeableRef} />;
 
 interface RightActionProps {
@@ -59,6 +65,8 @@ interface RightActionProps {
   progress: SharedValue<number>;
   totalWidth: number;
   swipeableRef: React.RefObject<SwipeableMethods>;
+  uuid:string;
+  navigation:any
 }
 
 const RightAction = ({
@@ -68,6 +76,8 @@ const RightAction = ({
   progress,
   totalWidth,
   swipeableRef,
+  uuid,
+  navigation
 }: RightActionProps) => {
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [
@@ -80,9 +90,10 @@ const RightAction = ({
     swipeableRef.current?.close();
     // eslint-disable-next-line no-alert
    
-    Clipboard.getString().then((str)=>{
-      Alert.alert(`${text}->${str}`);
-    })
+    if(text === "任务设置"){
+      navigation.navigate("TaskAddView",{uuid});
+    }
+
   };
 
   return (
@@ -99,7 +110,9 @@ const RightAction = ({
 const renderRightActions = (
   _: any,
   progress: SharedValue<number>,
-  swipeableRef: React.RefObject<SwipeableMethods>
+  swipeableRef: React.RefObject<SwipeableMethods>,
+  item:DataRow,
+  navigation:any,
 ) => (
   <View style={styles.rightActionsView}>
     
@@ -110,6 +123,8 @@ const renderRightActions = (
       progress={progress}
       totalWidth={192}
       swipeableRef={swipeableRef}
+      uuid = {item.uuid}
+      navigation = {navigation}
     />
     <RightAction
       text="事件日志"
@@ -118,12 +133,16 @@ const renderRightActions = (
       progress={progress}
       totalWidth={192}
       swipeableRef={swipeableRef}
+      uuid = {item.uuid}
+      navigation = {navigation}
     />
   </View>
 );
 
 export default function AppleStyleSwipeableRow({
+  item,
   children,
+  navigation,
 }: AppleStyleSwipeableRowProps) {
   const swipeableRow = useRef<SwipeableMethods>(null);
 
@@ -135,10 +154,10 @@ export default function AppleStyleSwipeableRow({
       leftThreshold={30}
       rightThreshold={40}
       renderLeftActions={(_, progress) =>
-        renderLeftActions(_, progress, swipeableRow)
+        renderLeftActions(_, progress, swipeableRow,item,navigation)
       }
       renderRightActions={(_, progress) =>
-        renderRightActions(_, progress, swipeableRow)
+        renderRightActions(_, progress, swipeableRow,item,navigation)
       }
       onSwipeableWillOpen={(direction) => {
         console.log(`Opening swipeable from the ${direction}`);
