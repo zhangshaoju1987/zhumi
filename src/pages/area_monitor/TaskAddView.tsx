@@ -111,8 +111,8 @@ export function TaskAddView(props:any){
               initialRegion={{
                 latitude,
                 longitude,
-                latitudeDelta:0.0375/48,    // 控制缩放
-                longitudeDelta:0.0812/48,   // 控制缩放
+                latitudeDelta:0.0375/56,    // 控制缩放
+                longitudeDelta:0.0812/56,   // 控制缩放
               }}
             >
               <Marker draggable onDragEnd={(event)=>{
