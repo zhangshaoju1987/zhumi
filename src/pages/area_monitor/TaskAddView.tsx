@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Alert, Dimensions, Keyboard, Linking, StyleSheet, View } from "react-native";
+import { Alert, Dimensions, Keyboard, Linking, StyleSheet, Vibration, View } from "react-native";
 import { Button, Chip, Divider, List, Switch, Text, TextInput } from "react-native-paper";
 import BottomSheet, { BottomSheetView, WINDOW_HEIGHT } from '@gorhom/bottom-sheet';
 import { store } from "../../redux/store";
@@ -70,7 +70,7 @@ export function TaskAddView(props:any){
           }}/>
         </View>
         <View style={{position:"relative",height:60}}>
-          <TextInput label="区域半径(米)" value={`${radius}`} onChangeText={text => {
+          <TextInput label="区域半径(米)" keyboardType="numeric" value={`${radius}`} onChangeText={text => {
             if(text){
               setRadius(parseInt(text));
             }else{
@@ -90,6 +90,7 @@ export function TaskAddView(props:any){
           <Button icon="cogs" mode="contained" onPress={() => addOrUpdateTask()} style={{margin:5}}>保存任务</Button>
           <Button icon="content-paste" buttonColor="red" mode="contained" style={{margin:5}} onPress={() => doPaste()}>粘贴</Button>
           <Button icon="map-marker-distance" buttonColor="green" mode="contained" style={{margin:5}} onPress={() => locate()}>查看位置</Button>
+          <Button icon="vibrate" buttonColor="blue" mode="contained" style={{margin:5}} onPress={() => Vibration.vibrate([1 * 1000,2 * 1000])}>震动</Button>
         </View>
         {showLocation && 
         <BottomSheet
