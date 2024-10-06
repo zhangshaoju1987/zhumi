@@ -2,10 +2,11 @@ import { PayloadAction } from "@reduxjs/toolkit";
 
 const initialState =
 {
-	distanceFilter:0,
+	distanceFilter:10,
+	intervalFilter:2,
     accuracy:"bestForNavigation",
     username:"竹米",
-    owner:"1",
+    owner:"zhangshaoju",
     mapProvider:undefined,
 	hideHomeFAB : false,
 	followUserLocation:true
@@ -19,6 +20,11 @@ const settings = (state = initialState, action:PayloadAction<typeof initialState
 		{
 			const {distanceFilter} = action.payload;
 			return {...state,distanceFilter};
+		}
+		case 'SET_INTERVAL_FILETER':
+		{
+			const {intervalFilter} = action.payload;
+			return {...state,intervalFilter};
 		}
 		case 'SET_FOLLOW_USER_LOCATION':
 		{

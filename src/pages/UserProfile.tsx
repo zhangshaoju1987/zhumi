@@ -14,6 +14,9 @@ function UserProfile(props:any){
           <TextInput label="距离阈值（位：米。可以控制报送的频率）" value={`${props.distanceFilter}`} onChangeText={text => props.setDistanceFilter(text)}/>
         </View>
         <View style={{position:"relative",height:60}}>
+          <TextInput label="间隔阈值（位：秒。控制报送的间隔）" value={`${props.intervalFilter}`} onChangeText={text => props.setIntervalFilter(text)}/>
+        </View>
+        <View style={{position:"relative",height:60}}>
           <TextInput label="用户名称（自定义，可随意更改）" value={`${props.username}`} onChangeText={text => props.setUsername(text)}/>
         </View>
         <View style={{position:"relative",height:60}}>
@@ -53,6 +56,7 @@ const mapStateToProps = (state:RootState) =>{
   return {
 		accuracy : state.settings.accuracy,
     distanceFilter : state.settings.distanceFilter,
+    intervalFilter : state.settings.intervalFilter,
     username : state.settings.username,
     owner : state.settings.owner,
     mapProvider : state.settings.mapProvider,
@@ -64,6 +68,7 @@ const mapDispatchToProps = (dispatch:any) =>
 	({
 		setAccuracy : (accuracy:string) => dispatch(settingsAction.setAccuracy(accuracy)),
     setDistanceFilter : (distanceFilter:string) => dispatch(settingsAction.setDistanceFilter(distanceFilter)),
+    setIntervalFilter : (distanceFilter:string) => dispatch(settingsAction.setIntervalFilter(distanceFilter)),
     setUsername : (username:string) => dispatch(settingsAction.setUsername(username)),
     setMapProvider : (mapProvider:string) => dispatch(settingsAction.setMapProvider(mapProvider)),
     setOwner : (owner:string) => dispatch(settingsAction.setOwner(owner)),

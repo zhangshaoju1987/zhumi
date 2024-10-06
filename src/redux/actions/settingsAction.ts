@@ -4,6 +4,11 @@ export const setDistanceFilter = (distanceFilter:string) =>
         payload: { distanceFilter }
     });
 
+   export const setIntervalFilter = (intervalFilter:string) =>
+        ({
+            type: 'SET_INTERVAL_FILETER',
+            payload: { intervalFilter }
+        });
 export const setAccuracy = (accuracy:string) =>
     ({
         type: 'SET_ACCURACY',

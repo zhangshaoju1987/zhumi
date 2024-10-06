@@ -86,7 +86,8 @@ interface HomeProps{
   setHideHomeFAB:(hideHomeFAB:boolean)=>{},
   navigation:any
 }
-
+// 上一次记录位置的时间
+let lastReportTime = -1;
 class Home extends React.Component<HomeProps, HomeState> {
   private bottomSheet_record:any;
   private map:any;
@@ -231,9 +232,15 @@ class Home extends React.Component<HomeProps, HomeState> {
       console.log("已停止记录");
     }else{
       this.watchId = Geolocation.watchPosition((position)=>{
-        
-        console.log(`(${this.watchId})获取到位置：${position.coords.latitude}`);
-        Api_AddPosition(store.getState().settings.owner,this.state.eventName,position.coords);
+        const now = new Date().getTime()/1000;// 秒为单位
+        const interval = store.getState().settings.intervalFilter;
+        if(lastReportTime == -1 || now - lastReportTime > interval){
+          console.log(`(${this.watchId})获取到位置：${position.coords.latitude}`);
+          lastReportTime = now;
+          Api_AddPosition(store.getState().settings.owner,this.state.eventName,position.coords);
+        }else{
+          console.warn("本次记录时间间隔小于："+interval+"秒，不予记录")
+        }
       },(error)=>{
         Alert.alert(error.code+error.message);
       },{
@@ -242,6 +249,8 @@ class Home extends React.Component<HomeProps, HomeState> {
         accuracy:{ios: this.props.accuracy},
         distanceFilter:this.props.distanceFilter
       });
+
+
       const record = {
         ...this.state.record,
         observing:true,
@@ -389,7 +398,20 @@ class Home extends React.Component<HomeProps, HomeState> {
         </View> */}
 
     <View style={{width: 360, height: 100,position:"absolute",top:60}}>
-      <Searchbar placeholder="我的活动" onChangeText={(keyword)=>{this.setState({keyword})}} value={this.state.keyword}/>
+      <Searchbar icon={"line-scan"} placeholder="我的活动" 
+        
+        onChangeText={(keyword)=>{this.setState({keyword})}} 
+        onIconPress={()=>{
+          this.props.setHideHomeFAB(true);
+          this.props.navigation.navigate("Scanner");
+        }}
+        onBlur={()=>{
+
+        if(this.state.keyword.indexOf("http") != -1){
+          this.props.setHideHomeFAB(true);
+          this.props.navigation.navigate("Browser",{uri:this.state.keyword});
+        }
+      }} value={this.state.keyword}/>
     </View>
 
 
@@ -402,7 +424,8 @@ class Home extends React.Component<HomeProps, HomeState> {
               Geolocation.getCurrentPosition(
                 (position) => {
                   this.changeCenter({latitude:position.coords.latitude,longitude:position.coords.longitude},64);
-                  Vibration.vibrate([1 * 1000,2 * 1000,3 * 1000,]);
+                  Vibration.vibrate([1 * 1000,2 * 1000,3 * 1000,
+]);
                 },
                 (error) => {
                   Alert.alert(error.code+error.message)
@@ -599,6 +622,7 @@ export default connect(
   (state:RootState)=>({
 		accuracy :        state.settings.accuracy,
     distanceFilter :  state.settings.distanceFilter,
+    intervalFilter :  state.settings.intervalFilter,
     username :        state.settings.username,
     owner :           state.settings.owner,
     mapProvider :     state.settings.mapProvider,

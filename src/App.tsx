@@ -18,6 +18,8 @@ import * as settingsAction from "./redux/actions/settingsAction";
 import { PersistGate } from 'redux-persist/integration/react';
 import { TaskAddView } from './pages/area_monitor/TaskAddView';
 import { Alert } from 'react-native';
+import { Browser } from './pages/Browser';
+import { Scanner } from './pages/Scanner';
 
 const Stack = createStackNavigator();
 
@@ -48,6 +50,8 @@ export default class App extends React.Component {
                   })}>
                     <Stack.Screen name="Home" component={Home}  options={{headerShown: false,title:"首页"}}/>
                     <Stack.Screen name="Chat" component={Example}  options={{headerShown: true,title:"智能助手"}}/>
+                    <Stack.Screen name="Browser" component={Browser}  options={{headerShown: false,title:"浏览器"}}/>
+                    <Stack.Screen name="Scanner" component={Scanner}  options={{headerShown: false,title:"扫描助手"}}/>
                     <Stack.Screen name="AreaTask" component={AreaTask}  options={(route)=>({headerShown: true,title:"电子围栏",headerRight: () => (
                                       <IconButton iconColor='green' icon={"bell-plus"}  onPress={() => Alert.alert("新增")}/>
                                     ),})}/>
